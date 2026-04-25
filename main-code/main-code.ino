@@ -12,10 +12,10 @@
   const float tempBuscada = 230.0; //230 para PP
   const int velocidadPaPgrande = -70; //-70 para PP
   const int velocidadPaPchico = 1000; 
-  const byte frecuenciaVariador = 80; // Valores de 0 a 255 // 100 ~= 18.7Hz // 80 ~= 14.9Hz
-  
-  //19,5Hz para PP D=1,7-1,8mm --- 
- 
+  const byte frecuenciaVariador = 105; // Valores de 0 a 255 // 105 ~= 19.5Hz // 100 ~= 18.7Hz // 80 ~= 14.9Hz
+
+  unsigned long esperaCalentando = 120000; 
+
 //
 
 //PROGRAMA ON/OFF
@@ -47,6 +47,7 @@ bool lastGreenState = HIGH;
 
 //Motores Paso a Paso
 
+//Velocidades Paso a Paco en "//parametros" Line 10
 const int ENA1 = 37;
 const int STP1 = 39;
 const int DIR1 = 41;
@@ -65,6 +66,7 @@ const int relayPin=12;
 
 //Variador de frecuencia
 
+//Velocidad variador de frecuencia en "//parametros" Line 10
 const int motorPin = 11;
 
 //Sensor RPM
@@ -81,7 +83,7 @@ const float alpha = 0.2;   // factor de suavizado (0.1 - 0.3 recomendado)
 
 //TEMPERATURA
 
-  bool tempAlcanzada = false;
+bool tempAlcanzada = false;
 //tempBuscada en "//parametros" Line 10
 float tempActual=0.0;
 
@@ -174,7 +176,7 @@ void loop() {
   else if(estado){
     temp();
     motores();
-    rpm();
+    // rpm();
     display();
   }
 }
@@ -275,6 +277,7 @@ void motores(){
   }
 }
 
+/*
 void rpm(){
   if (newPeriod) {
     noInterrupts();
@@ -306,7 +309,7 @@ void isr_pulse() {
   }
   lastPulseMicros = now;
 }
-
+*/
 
 
 void display(){
@@ -318,10 +321,10 @@ void display(){
     tiempo3 = millis();
 
     if(!encendidoMotores){
-    if(millis() <= tiempo4 + 5000){
+    if(millis() <= tiempo4 + esperaCalentando){
     lcd.setCursor(0, 1);
     lcd.print("ESPERA: ");
-    lcd.print(((tiempo4 + 5000) - millis()) / 1000);
+    lcd.print(((tiempo4 + esperaCalentando) - millis()) / 1000);
     lcd.print(" SEG  ");
     } else{
       encendidoMotores = 1;
