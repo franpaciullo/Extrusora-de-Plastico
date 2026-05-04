@@ -4,6 +4,7 @@
 #include <math.h>
 #include <Wire.h>
 #include <PID_v1.h>
+#include <U8g2lib.h>
 
 #define motorInterfaceType 1
 
@@ -14,14 +15,14 @@
   const int velocidadPaPchico = 1000; 
   const byte frecuenciaVariador = 105; // Valores de 0 a 255 // 105 ~= 19.5Hz // 100 ~= 18.7Hz // 80 ~= 14.9Hz
 
-  unsigned long esperaCalentando = 120000; 
+  unsigned long esperaCalentando = 120000; // Tiempo de espera después de alcanzar la temperatura para encender los motores
 
 //
 
 //PROGRAMA ON/OFF
-bool estado = 0;
+bool estado = 0; // 0 = esperando, 1 = funcionando
 
-bool encendidoMotores = 0;
+bool encendidoMotores = 0; // 0 = motores apagados, 1 = motores encendidos
 
 //TIEMPOS
 
@@ -148,7 +149,7 @@ void setup() {
   myPID.SetMode(AUTOMATIC);      // activar PID
 
   pinMode(sensorPin, INPUT); 
-  attachInterrupt(digitalPinToInterrupt(sensorPin), isr_pulse, FALLING);
+  //attachInterrupt(digitalPinToInterrupt(sensorPin), isr_pulse, FALLING);
 
   pinMode(ENA1, OUTPUT);
   pinMode(ENA2, OUTPUT);
@@ -315,8 +316,8 @@ void isr_pulse() {
 void display(){
   if(tempAlcanzada && millis() > tiempo3 + 500) {
     lcd.setCursor(0, 0);
-    lcd.print("TEMP: "); // Second screen
-    lcd.print(tempActual, 1); // Display current temperature with 1 decimal
+    lcd.print("TEMP: ");
+    lcd.print(tempActual, 1); // Mostrar temperatura con 1 decimal
     lcd.print(" C   ");
     tiempo3 = millis();
 
