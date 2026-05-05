@@ -20,84 +20,90 @@
 //
 
 //PROGRAMA ON/OFF
-bool estado = 0; // 0 = esperando, 1 = funcionando
+  bool estado = 0; // 0 = esperando, 1 = funcionando
 
-bool encendidoMotores = 0; // 0 = motores apagados, 1 = motores encendidos
+  bool encendidoMotores = 0; // 0 = motores apagados, 1 = motores encendidos
+//
 
 //TIEMPOS
 
-unsigned long tiempoActual = 0;
-unsigned long tiempo1 = 0;
-unsigned long tiempo2 = 0;
-unsigned long tiempo3 = 0;
-unsigned long tiempo4 = 0;
-unsigned long lastPidTime = 0;
-const unsigned long pidInterval = 200;
+ unsigned long tiempoActual = 0;
+ unsigned long tiempo1 = 0;
+ unsigned long tiempo2 = 0;
+ unsigned long tiempo3 = 0;
+ unsigned long tiempo4 = 0;
+ unsigned long lastPidTime = 0;
+ const unsigned long pidInterval = 200;
+//
 
 // PULSADORES
 
-const int redButtonPin = 35;
-const int greenButtonPin = 33;
-const int selectionButtonPin = 31;
-const int potPin = A2;
+ const int redButtonPin = 35;
+ const int greenButtonPin = 33;
+ const int selectionButtonPin = 31;
+ const int potPin = A2;
 
-bool currentSelectState = LOW;
-bool lastSelectState = LOW;
-bool currentGreenState = LOW;
-bool lastGreenState = HIGH;
+ bool currentSelectState = LOW;
+ bool lastSelectState = LOW;
+ bool currentGreenState = LOW;
+ bool lastGreenState = HIGH;
+//
 
 //Motores Paso a Paso
 
-//Velocidades Paso a Paco en "//parametros" Line 10
-const int ENA1 = 37;
-const int STP1 = 39;
-const int DIR1 = 41;
-const int ENA2 = 43;
-const int STP2 = 45;
-const int DIR2 = 47;
+ //Velocidades Paso a Paso en "//parametros" Line 10
+ const int ENA1 = 37;
+ const int STP1 = 39;
+ const int DIR1 = 41;
+ const int ENA2 = 43;
+ const int STP2 = 45;
+ const int DIR2 = 47;
 
-const int FC1 = 23;
-const int FC2 = 25;
+ const int FC1 = 23;
+ const int FC2 = 25;
 
-AccelStepper myStepper1(motorInterfaceType, STP1, DIR1);
-AccelStepper myStepper2(motorInterfaceType, STP2, DIR2);
+ AccelStepper myStepper1(motorInterfaceType, STP1, DIR1);
+ AccelStepper myStepper2(motorInterfaceType, STP2, DIR2);
 
-const int thermistorPin = A0;
-const int relayPin=12;
+ const int thermistorPin = A0;
+ const int relayPin=12;
+//
 
 //Variador de frecuencia
 
-//Velocidad variador de frecuencia en "//parametros" Line 10
-const int motorPin = 11;
+ //Velocidad variador de frecuencia en "//parametros" Line 10
+ const int motorPin = 11;
+//
 
 //Sensor RPM
 
-const uint8_t sensorPin = 2;  // pin digital 2 (interrupción INT0)
-const int PPR = 20;            // Pulsos por vuelta, ajustar según tu disco
+ const uint8_t sensorPin = 2;  // pin digital 2 (interrupción INT0)
+ const int PPR = 20;            // Pulsos por vuelta, ajustar según tu disco
 
-volatile unsigned long lastPulseMicros = 0;
-volatile unsigned long pulsePeriodMicros = 0;
-volatile bool newPeriod = false;
+ volatile unsigned long lastPulseMicros = 0;
+ volatile unsigned long pulsePeriodMicros = 0;
+ volatile bool newPeriod = false;
 
-float rpmFiltered = 0;     // RPM filtrada
-const float alpha = 0.2;   // factor de suavizado (0.1 - 0.3 recomendado)
+ float rpmFiltered = 0;     // RPM filtrada
+ const float alpha = 0.2;   // factor de suavizado (0.1 - 0.3 recomendado)
+//
 
 //TEMPERATURA
 
-bool tempAlcanzada = false;
-//tempBuscada en "//parametros" Line 10
-float tempActual=0.0;
+ bool tempAlcanzada = false;
+ //tempBuscada en "//parametros" Line 10
+ float tempActual=0.0;
 
-const float seriesResistor = 4700.0;      // resistencia en ohms
-const float nominalResistance = 100000.0; // resistencia del NTC a 25°C
-const float nominalTemperature = 25.0;    // temperatura nominal en °C
-const float bCoefficient = 3950.0;        // B del NTC
-const float vRef = 5.0;                  // voltaje de referencia
-const int adcMax = 1023;
+ const float seriesResistor = 4700.0;      // resistencia en ohms
+ const float nominalResistance = 100000.0; // resistencia del NTC a 25°C
+ const float nominalTemperature = 25.0;    // temperatura nominal en °C
+ const float bCoefficient = 3950.0;        // B del NTC
+ const float vRef = 5.0;                  // voltaje de referencia
+ const int adcMax = 1023;
 
-byte i = 0;
+ byte i = 0;
 
-float readThermistor() {
+ float readThermistor() {
   int adcValue = analogRead(thermistorPin);
   float voltage = adcValue * vRef / adcMax;
 
@@ -112,17 +118,16 @@ float readThermistor() {
   steinhart -= 273.15;                                 // °C
 
   return steinhart;
-}
+ }
 
+ double Setpoint, Input, Output;
+ double Kp = 10.0;
+ double Ki = 0.5;
+ double Kd = 0.0;
+ PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+//
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-double Setpoint, Input, Output;
-double Kp = 10.0;
-double Ki = 0.5;
-double Kd = 0.0;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
-
 
 void setup() {
   lcd.init();
